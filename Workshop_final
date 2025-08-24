@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 #define N 10
 #define MIN_SIZE 2
@@ -20,20 +21,25 @@ int main(){
         
         // Start modifying here
 
-        transpose(B, B_T, n, p);
-        
+        // Crear matriz transpuesta de B
+        double B_T[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                B_T[j][i] = B[i][j];
+            }
+        }
+        // Multiplicación de matrices usando OpenMP
         #pragma omp parallel for
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < p; j++) {
-                double sum = 0;
-                // 2. Bloques para vectorización
-                for (int k = 0; k < n; k++) {
-                    sum += A[i][k] * B_T[j][k]; // acceso contiguo
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                double sum = 0.0;
+                // Acceso contiguo para vectorización
+                for (int k = 0; k < size; k++) {
+                    sum += A[i][k] * B_T[j][k];
                 }
                 C[i][j] = sum;
             }
         }
-
 
         // Stop modifying here
         
